@@ -32,11 +32,24 @@
                             <input type="text" id="region" style="width: 100%">
                           </div><br>
                           <button class="btn btn-primary" type="button"><a id="ShowLink" href="index.html">Show</a></button>
+
+                          <table class="scroll" id="table">
+                            <thead>
+                                <tr>
+                                    <th style="width:200px">Name</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td></td>
+                                </tr>                            
+                                </tbody>
+                                </table>
                 </li>          
                 </ul>
               </div>
        
-    <div id='map' style='width: 1000px; height: 700px; '></div>
+    <div id='map' style='width: 1150px; height: 700px; '></div>
     <pre id='coordinates' class='coordinates'></pre>
 
     <script>
@@ -47,7 +60,7 @@
     addPolygons();
 
     function AddPolygonToMap(data)
-            {
+            {var i = 0;
                 var result = [];
                 data.forEach( geojson => {
                 var GPS = JSON.parse(geojson.st_asgeojson)
@@ -60,6 +73,14 @@
                         "regionName": geojson.name,
                     }              
                 })
+
+                i++;
+
+                var table = document.getElementById("table");
+                var row = table.insertRow(i);
+                var cell1 = row.insertCell(0);
+                cell1.innerHTML = geojson.name;
+
                 });
                 return result;
             };

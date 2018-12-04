@@ -34,6 +34,23 @@
                       </div>
                   </form>
                   <button class="btn btn-primary" type="button"><a id="ShowLink" href="line.html">Show</a></button> 
+
+                  <p></p>
+
+                  <table class="scroll" id="table">
+                    <thead>
+                        <tr>
+                            <th style="width:200px">Name</th>
+                            <th style="width:116px">Amenity</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td></td>
+                            <td></td>
+                        </tr>                            
+                        </tbody>
+                        </table>
         </li>
         <br>
           <li><a href="http://localhost:3000/pointsInArea.html?lng=-0.10685149067768407&lat=51.49627892557859&area=500">Find in area</a>
@@ -44,7 +61,7 @@
         </ul>
       </div>
        
-    <div id='map' style='width: 1100px; height: 700px; '></div>
+    <div id='map' style='width: 1150px; height: 700px; '></div>
     <pre id='coordinates' class='coordinates'></pre>
 
     <script>
@@ -58,7 +75,7 @@
     
 
     function AddPointsToMap(data)
-            {
+            {var i = 0;
                 var result = [];
                 data.forEach( geojson => {
                 
@@ -91,6 +108,15 @@
                         "id": geojson.osm_id
                     }              
                 })
+                
+                i++;
+
+                var table = document.getElementById("table");
+                var row = table.insertRow(i);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                cell1.innerHTML = geojson.name;
+                cell2.innerHTML = geojson.amenity;
                 });
                 return result;
             };

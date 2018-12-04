@@ -27,12 +27,25 @@
                 </li>
                 <br>
                   <li class="active"><a href="polygon.html">Show in London quarter</a><br>
-                    <div class="form-group">
+                    <table class="scroll" id="table">
+                        <thead>
+                            <tr>
+                                <th style="width:200px">Name</th>
+                                <th style="width:116px">Amenity</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td></td>
+                                <td></td>
+                            </tr>                            
+                            </tbody>
+                            </table>
                 </li>          
                 </ul>
               </div>
        
-    <div id='map' style='width: 1000px; height: 700px; '></div>
+    <div id='map' style='width: 1150px; height: 700px; '></div>
     <pre id='coordinates' class='coordinates'></pre>
 
     <script>
@@ -52,7 +65,7 @@
     addFoodPoints();
 
     function AddPointsToMap(data)
-            {
+            {var i = 0;
                 var result = [];
                 var icon = "restaurant";
                 data.forEach( geojson => {
@@ -85,6 +98,15 @@
                         "locationGeoJson" : geojson.st_asgeojson,
                     }              
                 })
+
+                i++;
+
+                var table = document.getElementById("table");
+                var row = table.insertRow(i);
+                var cell1 = row.insertCell(0);
+                var cell2 = row.insertCell(1);
+                cell1.innerHTML = geojson.name;
+                cell2.innerHTML = geojson.amenity;
                 });
                 return result;
             };
