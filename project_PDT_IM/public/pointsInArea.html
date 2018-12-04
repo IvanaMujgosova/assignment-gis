@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html ng-app="nodeGeoData">
+  <head>
+    <title>London</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <link rel="stylesheet" href="/stylesheets/style.css" media="screen">
+    
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v0.51.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="//code.jquery.com/jquery-2.2.4.min.js" type="text/javascript"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" type="text/javascript"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular.js/1.5.6/angular.min.js"></script>
+  </head>
+
+  <body ng-controller="mainController">
+
+
+        <div class="container navbar-right" style='width: 400px; height: 700px; '>
+                <h3>Controller</h3>
+                <p>Update values to change view</p>
+                <ul class="nav nav-pills nav-stacked ">
+                  <li><a href="index.html">All food places</a><br>
+                    <form action="">
+
+                </li>
+                <br>
+                  <li class="active"><a href="http://localhost:3000/pointsInArea.html?lng=-0.10685149067768407&lat=51.49627892557859&area=500">Find in area</a> <br>
+                    <div class="form-group">
+                            <label for="gps">GPS:</label>
+                            <input type="text" id="lng">
+                            <input type="text" id="lat"><br>
+                       
+                            <label for="area">Area(m):</label>
+                            <input type="text" id="area">
+                          </div><br>
+                          <button class="btn btn-primary" type="button"><a id="ShowLink" href="pointsInArea.html">Show</a></button>
+                </li><br>
+                  <li><a href="polygon.html">Show in London quarter</a></li>          
+                </ul>
+              </div>
+
+
+    <div id='map' style='width: 1000px; height: 700px; '></div>
+    <pre id='coordinates' class='coordinates'></pre>
+
+    <script>
+    var position;
+    var map = null;
+    var lat = -0.08;
+    var lng = 51.51;
+    var link; 
+    var area = 500;
+    var icon = "restaurant";
+
+var queryString = decodeURIComponent(window.location.search);
+queryString = queryString.substring(1);
+var queries = queryString.split("&");
+for (var i = 0; i < queries.length; i++)
+{
+  document.write(queries[i] + "<br>");
+  if (i == 0) lat = parseFloat(queries[i].slice(4));
+  if (i == 1) lng = parseFloat(queries[i].slice(4));
+  if (i == 2) area = parseFloat(queries[i].slice(5));
+}
+
+document.getElementById("area").value = area;
+document.getElementById("lat").value = lat;
+document.getElementById("lng").value = lng;
+
+    addSomeFoodPoints();
+    
+
+    function AddPointsToMap(data)
+            {
+                var result = [];
+                data.forEach( geojson => {
+                
+                switch (geojson.amenity)
+                {
+                    case "restaurant": 
+                        icon = "restaurant";
+                        break;
+                    case "cafe": 
+                        icon = "cafe";
+                        break;
+                    case "fast-food": 
+                        icon = "fast-food";
+                        break;
+                    case "pub": 
+                        icon = "bar";
+                        break;
+                }
+
+                var GPS = JSON.parse(geojson.st_asgeojson)
+
+                result.push ({
+                    "type": "Feature",
+                    "geometry" : JSON.parse(geojson.st_asgeojson),
+                    "properties": {
+                        "name": "<strong>" + geojson.name + "</strong>",
+                        "icon": icon,
+                        "description": "<strong>" + geojson.name + "</strong><p>" + geojson.amenity + " </p>",
+                        "locationGeoJson" : geojson.st_asgeojson,
+                    }              
+                })
+                });
+                return result;
+            };
+
+    function addMap(data)
+    {
+        mapboxgl.accessToken = 'pk.eyJ1IjoibWlhODE1IiwiYSI6ImNqbXh6bmV5OTFwaGYzd3F5OGZzdjNzc3YifQ.MKspQIK7MTwBoa0ASsxBZg';
+        map = new mapboxgl.Map({
+        container: 'map',
+        style: 'mapbox://styles/mapbox/bright-v9',
+        center: [lat,lng], 
+        zoom: 14
+    });
+
+    var marker = new mapboxgl.Marker({
+    draggable: true
+    })
+    .setLngLat([lat,lng])
+    .addTo(map);
+
+    marker.on('dragend', onDragEnd);
+
+    map.on('load', function () {
+    
+    map.addLayer({
+        "id": "places",
+        "type": "symbol",
+        "source": {
+            "type": "geojson",
+            "data": {
+                "type": "FeatureCollection",
+                "features":
+                AddPointsToMap(data)
+            }
+        },
+        "layout": {
+            "icon-image": "{icon}-15",
+            "icon-allow-overlap": true
+        }
+    });
+
+    }); 
+    
+        function onDragEnd() {
+        var lngLat = marker.getLngLat();
+        coordinates.style.display = 'block';
+        coordinates.innerHTML = 'Longitude: ' + lngLat.lng + '<br />Latitude: ' + lngLat.lat;
+        document.getElementById("lng").value=lngLat.lng;
+        document.getElementById("lat").value=lngLat.lat;
+        console.log(document.getElementById("area").value);
+        var link = "pointsInArea.html" + "?lng=" + lngLat.lng + "&lat=" + lngLat.lat +"&area=" + document.getElementById("area").value;
+        document.getElementById("ShowLink").href = link;
+    }
+                    // When a click event occurs on a feature in the places layer, open a popup at the
+        // location of the feature, with description HTML from its properties.
+        map.on('click', 'places', function (e) {
+            var coordinates = e.features[0].geometry.coordinates.slice();
+            var description = e.features[0].properties.description;
+
+            // Ensure that if the map is zoomed out such that multiple
+            // copies of the feature are visible, the popup appears
+            // over the copy being pointed to.
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+
+            new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(e.features[0].properties.name)
+                .addTo(map);                
+        });
+
+        // Change the cursor to a pointer when the mouse is over the places layer.
+        map.on('mouseenter', 'places', function () {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+
+        // Change it back to a pointer when it leaves.
+        map.on('mouseleave', 'places', function () {
+            map.getCanvas().style.cursor = '';
+        });
+    
+}
+
+    function addSomeFoodPoints()
+    {
+    angular.module('nodeGeoData', [])
+    .controller('mainController', ($scope, $http) => {
+    $scope.formData = {};
+    $scope.geoData = {};
+    // Get all todos
+    $http.get('/api/v2/geoData/' + lat + '-' + lng + '-' + area)
+    .success((data) => {
+        $scope.geoData = data;
+        addMap(data);
+    })
+
+    .error((error) => {
+        console.log('Error: ' + error);
+    });
+    });
+    }
+    </script>
+  </body>
+</html> 
