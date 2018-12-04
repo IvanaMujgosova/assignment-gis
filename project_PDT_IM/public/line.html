@@ -62,7 +62,7 @@
                     "type": "Feature",
                     "geometry" : JSON.parse(geojson.finalline),
                     "properties": {
-                        "description": "Distance from point A:" +  geojson.a_toline + "<br> Distance from point B: " + geojson.b_toline, 
+                        "description": "Distance from point A:" +  Math.round(geojson.a_toline * 100) / 100 + "<br> Distance from point B: " + Math.round(geojson.b_toline * 100) / 100, 
                     }              
                 })
                 });
