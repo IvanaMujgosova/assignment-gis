@@ -9,7 +9,7 @@ Scenarios:
 
 Screenshot of application:
 
-![Screenshot](screenshot.png)
+![Screenshot](screenshot1.png)
 
 Skeleton of application is created using Express generator, Angular and Node.js. Client of this application is using mapbox API and the backend is written in JavaScript with PostGIS database.
 
